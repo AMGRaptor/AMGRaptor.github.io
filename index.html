@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBA球员评分系统</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        .search-container {
+            text-align: center;
+            margin: 30px auto;
+            max-width: 500px;
+            position: relative;
+        }
+
+        #player-search {
+            padding: 10px 15px;
+            width: 70%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .player-container {
+            display: flex;
+            max-width: 900px;
+            margin: 30px auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .player-image {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .player-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            max-height: 400px;
+        }
+
+        .player-info {
+            flex: 1;
+            padding: 30px;
+        }
+
+        #player-name {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .stat-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .stat-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        .stat-value {
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        #suggestion-box {
+            position: absolute;
+            width: 70%;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 4px 4px;
+            z-index: 100;
+            margin-top: -1px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #suggestion-box div {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        #suggestion-box div:hover {
+            background-color: #f0f0f0;
+        }
+
+        @media (max-width: 768px) {
+            .player-container {
+                flex-direction: column;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <input type="text" id="player-search" placeholder="搜索球员名字...">
+        <button onclick="searchPlayer()">搜索</button>
+        <div id="suggestion-box" style="display: none;"></div>
+    </div>
+    
+    <div id="player-display" class="hidden">
+        <div class="player-container">
+            <div class="player-image">
+                <img id="player-img" src="" alt="球员照片" onerror="this.src='https://via.placeholder.com/300x400?text=暂无图片'">
+            </div>
+            <div class="player-info">
+                <h1 id="player-name"></h1>
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <span class="stat-label">最终得分</span>
+                        <span class="stat-value" id="final-score"></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">平均得分</span>
+                        <span class="stat-value" id="avg-points"></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">平均篮板</span>
+                        <span class="stat-value" id="avg-rebounds"></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">平均助攻</span>
+                        <span class="stat-value" id="avg-assists"></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">平均抢断</span>
+                        <span class="stat-value" id="avg-steals"></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">平均盖帽</span>
+                        <span class="stat-value" id="avg-blocks"></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">投篮命中率</span>
+                        <span class="stat-value" id="fg-percentage"></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">三分命中率</span>
+                        <span class="stat-value" id="3pt-percentage"></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">罚球命中率</span>
+                        <span class="stat-value" id="ft-percentage"></span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">平均上场时间</span>
+                        <span class="stat-value" id="avg-minutes"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 球员数据
+        const playersData = [
+            {
+                "name": "约基奇",
+                "avgPoints": 29.8,
+                "avgRebounds": 12.8,
+                "avgAssists": 10.2,
+                "avgSteals": 1.8,
+                "avgBlocks": 0.6,
+                "fgPercentage": 0.576,
+                "threePtPercentage": 0.415,
+                "ftPercentage": 0.808,
+                "avgMinutes": 36.8,
+                "finalScore": 43.79,
+                "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png"
+            },
+            {
+                "name": "字母哥",
+                "avgPoints": 30.4,
+                "avgRebounds": 11.9,
+                "avgAssists": 6.3,
+                "avgSteals": 0.8,
+                "avgBlocks": 1.2,
+                "fgPercentage": 0.603,
+                "threePtPercentage": 0.23,
+                "ftPercentage": 0.612,
+                "avgMinutes": 34.1,
+                "finalScore": 41.05,
+                "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png"
+            },
+            {
+                "name": "亚历山大",
+                "avgPoints": 32.7,
+                "avgRebounds": 5,
+                "avgAssists": 6.4,
+                "avgSteals": 1.7,
+                "avgBlocks": 1,
+                "fgPercentage": 0.519,
+                "threePtPercentage": 0.375,
+                "ftPercentage": 0.898,
+                "avgMinutes": 34.2,
+                "finalScore": 38.96,
+                "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/1629023.png"
+            },
+            {
+                "name": "东契奇",
+                "avgPoints": 34.3,
+                "avgRebounds": 9.1,
+                "avgAssists": 9.8,
+                "avgSteals": 1.4,
+                "avgBlocks": 0.6,
+                "fgPercentage": 0.487,
+                "threePtPercentage": 0.382,
+                "ftPercentage": 0.789,
+                "avgMinutes": 37.5,
+                "finalScore": 45.21,
+                "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png"
+            },
+            {
+                "name": "库里",
+                "avgPoints": 24.5,
+                "avgRebounds": 4.5,
+                "avgAssists": 6,
+                "avgSteals": 1.1,
+                "avgBlocks": 0.4,
+                "fgPercentage": 0.448,
+                "threePtPercentage": 0.395,
+                "ftPercentage": 0.931,
+                "avgMinutes": 32.1,
+                "finalScore": 32.51,
+                "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png"
+            },
+            {
+                "name": "塔图姆",
+                "avgPoints": 27,
+                "avgRebounds": 8.6,
+                "avgAssists": 6,
+                "avgSteals": 1.1,
+                "avgBlocks": 0.5,
+                "fgPercentage": 0.453,
+                "threePtPercentage": 0.344,
+                "ftPercentage": 0.813,
+                "avgMinutes": 36.5,
+                "finalScore": 34.68,
+                "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/1628369.png"
+            },
+            {
+                "name": "杜兰特",
+                "avgPoints": 26.6,
+                "avgRebounds": 6.1,
+                "avgAssists": 4.2,
+                "avgSteals": 0.8,
+                "avgBlocks": 1.2,
+                "fgPercentage": 0.527,
+                "threePtPercentage": 0.43,
+                "ftPercentage": 0.839,
+                "avgMinutes": 36.6,
+                "finalScore": 31.89,
+                "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png"
+            },
+            {
+                "name": "恩比德",
+                "avgPoints": 33.1,
+                "avgRebounds": 10.2,
+                "avgAssists": 4.2,
+                "avgSteals": 1,
+                "avgBlocks": 1.7,
+                "fgPercentage": 0.547,
+                "threePtPercentage": 0.33,
+                "ftPercentage": 0.857,
+                "avgMinutes": 34.1,
+                "finalScore": 42.35,
+                "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/203954.png"
+            },
+            {
+                "name": "詹姆斯",
+                "avgPoints": 24.6,
+                "avgRebounds": 7.9,
+                "avgAssists": 8.2,
+                "avgSteals": 1,
+                "avgBlocks": 0.6,
+                "fgPercentage": 0.512,
+                "threePtPercentage": 0.378,
+                "ftPercentage": 0.782,
+                "avgMinutes": 35.1,
+                "finalScore": 35.32,
+                "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png"
+            },
+            {
+                "name": "安东尼戴维斯",
+                "avgPoints": 24.7,
+                "avgRebounds": 12.6,
+                "avgAssists": 3.5,
+                "avgSteals": 1.2,
+                "avgBlocks": 2.3,
+                "fgPercentage": 0.557,
+                "threePtPercentage": 0.298,
+                "ftPercentage": 0.814,
+                "avgMinutes": 35.8,
+                "finalScore": 39.42,
+                "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/203076.png"
+            }
+        ];
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 添加搜索按钮事件
+            document.querySelector('button').addEventListener('click', searchPlayer);
+            
+            // 添加回车键搜索功能
+            document.getElementById('player-search').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchPlayer();
+                }
+            });
+            
+            // 添加自动完成功能
+            document.getElementById('player-search').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const suggestionBox = document.getElementById('suggestion-box');
+                
+                if (searchTerm.length < 1) {
+                    suggestionBox.style.display = 'none';
+                    return;
+                }
+                
+                const suggestions = playersData.filter(player => 
+                    player.name.toLowerCase().includes(searchTerm)
+                ).slice(0, 5);
+                
+                if (suggestions.length > 0) {
+                    showSuggestions(suggestions);
+                    suggestionBox.style.display = 'block';
+                } else {
+                    suggestionBox.style.display = 'none';
+                }
+            });
+            
+            // 点击页面其他区域隐藏建议框
+            document.addEventListener('click', function(e) {
+                if (e.target.id !== 'player-search') {
+                    document.getElementById('suggestion-box').style.display = 'none';
+                }
+            });
+        });
+
+        function searchPlayer() {
+            const searchInput = document.getElementById('player-search').value.trim();
+            const playerDisplay = document.getElementById('player-display');
+            
+            if (!searchInput) {
+                alert('请输入球员名字');
+                return;
+            }
+            
+            // 不区分大小写搜索
+            const player = playersData.find(p => 
+                p.name.toLowerCase().includes(searchInput.toLowerCase())
+            );
+            
+            if (player) {
+                updatePlayerDisplay(player);
+                playerDisplay.classList.remove('hidden');
+            } else {
+                alert('未找到该球员，请检查名字是否正确');
+                playerDisplay.classList.add('hidden');
+            }
+            
+            // 隐藏建议框
+            document.getElementById('suggestion-box').style.display = 'none';
+        }
+
+        function updatePlayerDisplay(player) {
+            // 更新基本信息
+            document.getElementById('player-name').textContent = player.name;
+            document.getElementById('player-img').src = player.image;
+            document.getElementById('player-img').alt = `${player.name}的照片`;
+            
+            // 更新统计数据
+            document.getElementById('final-score').textContent = player.finalScore;
+            document.getElementById('avg-points').textContent = player.avgPoints;
+            document.getElementById('avg-rebounds').textContent = player.avgRebounds;
+            document.getElementById('avg-assists').textContent = player.avgAssists;
+            document.getElementById('avg-steals').textContent = player.avgSteals;
+            document.getElementById('avg-blocks').textContent = player.avgBlocks;
+            document.getElementById('fg-percentage').textContent = `${(player.fgPercentage * 100).toFixed(1)}%`;
+            document.getElementById('3pt-percentage').textContent = `${(player.threePtPercentage * 100).toFixed(1)}%`;
+            document.getElementById('ft-percentage').textContent = `${(player.ftPercentage * 100).toFixed(1)}%`;
+            document.getElementById('avg-minutes').textContent = `${player.avgMinutes}分钟`;
+        }
+
+        function showSuggestions(suggestions) {
+            const box = document.getElementById('suggestion-box');
+            box.innerHTML = '';
+            
+            suggestions.forEach(player => {
+                const item = document.createElement('div');
+                item.textContent = player.name;
+                item.style.padding = '8px';
+                item.style.cursor = 'pointer';
+                item.addEventListener('click', () => {
+                    document.getElementById('player-search').value = player.name;
+                    box.style.display = 'none';
+                    searchPlayer();
+                });
+                box.appendChild(item);
+            });
+        }
+    </script>
+</body>
+</html>
