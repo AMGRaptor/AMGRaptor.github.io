@@ -3,166 +3,706 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NBA球员评分系统 / NBA Player Rating System</title>
+    <title>Player Rating System - 球员评分系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* 基础样式 / Base Styles */
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
+        :root {
+            --primary: #1a4b8c;
+            --secondary: #ff6b35;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --info: #17a2b8;
+        }
+        
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
             color: #333;
             line-height: 1.6;
         }
         
-        /* 双语文本样式 / Bilingual Text Styles */
-        .chinese {
-            font-weight: bold;
-            color: #333;
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
         }
         
-        .english {
-            font-size: 0.85em;
+        /* 导航栏样式 */
+        header {
+            background: linear-gradient(135deg, var(--primary), #0d2d5a);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--secondary);
+            transition: transform 0.5s ease;
+        }
+        
+        .logo:hover i {
+            transform: rotate(360deg);
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 2rem;
+            position: relative;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 5px 0;
+        }
+        
+        .nav-links a:hover {
+            color: var(--secondary);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--secondary);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .language-switcher {
+            margin-left: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .language-switcher:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* 选项卡样式 */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            border-bottom: 2px solid #ddd;
+        }
+        
+        .tab-btn {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
             color: #666;
-            font-style: italic;
-            margin-top: 2px;
+            position: relative;
+            transition: all 0.3s;
+            overflow: hidden;
         }
         
-        /* 欢迎页面样式 / Welcome Page Styles */
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(26, 75, 140, 0.1), transparent);
+            transition: left 0.5s;
+        }
+        
+        .tab-btn:hover::before {
+            left: 100%;
+        }
+        
+        .tab-btn.active {
+            color: var(--primary);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background-color: var(--primary);
+            border-radius: 4px 4px 0 0;
+            animation: tabUnderline 0.3s ease;
+        }
+        
+        @keyframes tabUnderline {
+            from { width: 0; left: 50%; }
+            to { width: 100%; left: 0; }
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 英雄区域样式 */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1400&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 5rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 10%, rgba(0, 0, 0, 0.8) 100%);
+            animation: pulse 4s infinite ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: slideDown 1s ease;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            animation: slideUp 1s ease;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--secondary);
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn:hover {
+            background-color: #e55a2b;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 内容区域样式 */
+        .section {
+            padding: 5rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: var(--primary);
+            position: relative;
+        }
+        
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--secondary);
+            margin: 10px auto;
+            border-radius: 2px;
+            animation: lineExpand 0.5s ease;
+        }
+        
+        @keyframes lineExpand {
+            from { width: 0; }
+            to { width: 80px; }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .card.animate {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.2), transparent);
+            transform: rotate(30deg);
+            animation: shine 3s infinite linear;
+        }
+        
+        @keyframes shine {
+            from { transform: translateX(-100%) rotate(30deg); }
+            to { transform: translateX(100%) rotate(30deg); }
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .issues-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            transition: background-color 0.3s;
+        }
+        
+        th {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        tr:hover {
+            background-color: #e9e9e9;
+        }
+        
+        /* 引用样式 */
+        blockquote {
+            border-left: 4px solid var(--secondary);
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: #555;
+            position: relative;
+        }
+        
+        blockquote::before {
+            content: """;
+            position: absolute;
+            top: -20px;
+            left: 5px;
+            font-size: 60px;
+            color: var(--secondary);
+            opacity: 0.2;
+        }
+        
+        /* 产品展示区域 */
+        .product-showcase {
+            background: linear-gradient(135deg, #1a4b8c, #2c6cbf);
+            color: white;
+            text-align: center;
+            padding: 4rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-showcase::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1518611012118-696072aa579a?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') center/cover;
+            opacity: 0.1;
+        }
+        
+        /* 未来构想区域 */
+        .future-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .future-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .future-item.animate {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .future-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .future-item h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .future-item h3::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 30px;
+            height: 2px;
+            background-color: var(--secondary);
+            transition: width 0.3s;
+        }
+        
+        .future-item:hover h3::after {
+            width: 100%;
+        }
+        
+        .future-item ul {
+            list-style-position: inside;
+            padding-left: 1rem;
+        }
+        
+        .future-item li {
+            margin-bottom: 0.5rem;
+            transition: transform 0.3s;
+        }
+        
+        .future-item li:hover {
+            transform: translateX(5px);
+            color: var(--primary);
+        }
+        
+        /* 球员评分系统样式 */
+        .rating-system {
+            padding: 2rem 0;
+        }
+        
         .welcome-container {
             max-width: 1000px;
             margin: 0 auto;
-            padding: 30px 20px;
+            padding: 20px;
             text-align: center;
         }
         
         .welcome-title {
-            color: #007bff;
+            color: var(--primary);
             font-size: 2.5em;
-            margin-bottom: 15px;
+            margin-bottom: 30px;
+            position: relative;
+            display: inline-block;
         }
         
-        .welcome-subtitle {
-            color: #666;
-            margin-bottom: 30px;
+        .welcome-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50%;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 3px;
         }
         
         .players-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
             margin-top: 30px;
         }
         
         .player-card {
             background-color: white;
-            border-radius: 10px;
-            padding: 20px 15px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .player-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(26, 75, 140, 0.1), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .player-card:hover::before {
+            opacity: 1;
         }
         
         .player-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
         .player-name {
             font-weight: bold;
             font-size: 1.1em;
             color: #333;
-        }
- 
-        /* 评分页面样式 / Rating Page Styles */
-        .search-container {
-            text-align: center;
-            margin: 40px auto;
-            max-width: 600px;
-            position: relative;
-            padding: 0 20px;
-        }
- 
-        #player-search {
-            padding: 12px 20px;
-            width: 70%;
-            border: 1px solid #ddd;
-            border-radius: 25px;
-            font-size: 16px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: border-color 0.3s, box-shadow 0.3s;
+            transition: color 0.3s;
         }
         
+        .player-card:hover .player-name {
+            color: var(--primary);
+        }
+
+        .search-container {
+            text-align: center;
+            margin: 30px auto;
+            max-width: 500px;
+            position: relative;
+        }
+
+        #player-search {
+            padding: 10px 15px;
+            width: 70%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
         #player-search:focus {
-            border-color: #007bff;
-            box-shadow: 0 2px 10px rgba(0,123,255,0.2);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 75, 140, 0.1);
             outline: none;
         }
- 
-        button {
-            padding: 12px 25px;
-            background-color: #007bff;
+
+        .rating-btn {
+            padding: 10px 20px;
+            background-color: var(--primary);
             color: white;
             border: none;
-            border-radius: 25px;
+            border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
             margin-left: 10px;
-            transition: background-color 0.3s, transform 0.2s;
+            transition: all 0.3s;
         }
- 
-        button:hover {
-            background-color: #0056b3;
+
+        .rating-btn:hover {
+            background-color: #0d2d5a;
             transform: translateY(-2px);
         }
-        
-        button:active {
-            transform: translateY(0);
-        }
- 
+
         .hidden {
             display: none;
         }
- 
+
         .player-container {
             display: flex;
-            max-width: 1000px;
-            margin: 40px auto;
+            max-width: 900px;
+            margin: 30px auto;
             background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            animation: scaleIn 0.5s ease;
         }
- 
+        
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
         .player-image {
             flex: 1;
-            padding: 30px;
+            padding: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #f8f9fa;
+            background: #f5f7fa;
+            position: relative;
         }
- 
+
+        .player-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(26, 75, 140, 0.1), transparent);
+        }
+
         .player-image img {
             max-width: 100%;
             height: auto;
-            border-radius: 6px;
-            max-height: 450px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 4px;
+            max-height: 400px;
+            transition: transform 0.5s;
+            position: relative;
+            z-index: 1;
         }
- 
+        
+        .player-image:hover img {
+            transform: scale(1.05);
+        }
+
         .player-info {
-            flex: 1.5;
-            padding: 40px;
+            flex: 1;
+            padding: 30px;
         }
- 
+
         #player-name {
             text-align: center;
-            color: #007bff;
+            color: var(--primary);
             margin-bottom: 30px;
             font-size: 2.5em;
             position: relative;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
         }
         
         #player-name::after {
@@ -173,91 +713,161 @@
             transform: translateX(-50%);
             width: 100px;
             height: 3px;
-            background: linear-gradient(to right, #007bff, #00bfff);
+            background: var(--secondary);
+            border-radius: 3px;
         }
- 
+
         .stats-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
+            gap: 20px;
         }
- 
+
         .stat-item {
             background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            transition: transform 0.3s, box-shadow 0.3s;
+            padding: 15px;
+            border-radius: 6px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s;
+        }
+        
+        .stat-item:hover::before {
+            width: 100%;
+            opacity: 0.1;
         }
         
         .stat-item:hover {
             transform: translateY(-3px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
- 
+        
+        .stat-item:hover .stat-label,
+        .stat-item:hover .stat-value {
+            color: white;
+            z-index: 1;
+            position: relative;
+        }
+
         .stat-label {
             display: block;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             color: #666;
+            transition: color 0.3s;
         }
- 
+
         .stat-value {
-            font-size: 1.3em;
+            font-size: 1.2em;
             color: #333;
-            font-weight: bold;
+            transition: color 0.3s;
         }
- 
+
         #suggestion-box {
             position: absolute;
-            width: calc(70% + 10px);
-            left: 0;
+            width: 70%;
             background-color: white;
             border: 1px solid #ddd;
-            border-radius: 0 0 10px 10px;
+            border-radius: 0 0 4px 4px;
             z-index: 100;
             margin-top: -1px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            max-height: 300px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            max-height: 200px;
             overflow-y: auto;
         }
- 
+
         #suggestion-box div {
-            padding: 12px 20px;
+            padding: 8px;
             cursor: pointer;
             transition: background-color 0.2s;
         }
- 
+
         #suggestion-box div:hover {
             background-color: #f0f0f0;
         }
         
-        /* 返回按钮 / Back Button */
-        .back-btn-container {
+        /* 页脚样式 */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 3rem 0 1.5rem;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        
+        .footer-section h3:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background: var(--secondary);
+        }
+        
+        .contact-info {
+            list-style: none;
+        }
+        
+        .contact-info li {
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .contact-info i {
+            margin-right: 10px;
+            color: var(--secondary);
+        }
+        
+        .footer-bottom {
             text-align: center;
-            margin: 30px 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid #444;
         }
         
-        .back-btn {
-            background-color: #6c757d;
-            padding: 12px 30px;
-            font-size: 1.1em;
-        }
-        
-        .back-btn:hover {
-            background-color: #5a6268;
-        }
- 
+        /* 响应式设计 */
         @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .section {
+                padding: 3rem 0;
+            }
+            
             .player-container {
                 flex-direction: column;
-            }
-            
-            .player-image {
-                padding: 20px;
-            }
-            
-            .player-info {
-                padding: 30px;
             }
             
             .stats-container {
@@ -265,157 +875,755 @@
             }
             
             .players-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-                gap: 15px;
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             }
             
-            #player-search {
-                width: 100%;
-                margin-bottom: 15px;
+            .tab-btn {
+                padding: 0.8rem 1rem;
+                font-size: 1rem;
             }
-            
-            button {
-                width: 100%;
-                margin-left: 0;
-            }
-            
-            .search-container {
-                padding: 0 15px;
-            }
-            
-            #suggestion-box {
-                width: 100%;
-            }
+        }
+        
+        /* 加载动画 */
+        .loader {
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loader:after {
+            content: " ";
+            display: block;
+            width: 64px;
+            height: 64px;
+            margin: 8px;
+            border-radius: 50%;
+            border: 6px solid var(--primary);
+            border-color: var(--primary) transparent var(--primary) transparent;
+            animation: loader 1.2s linear infinite;
+        }
+        
+        @keyframes loader {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 直接跳转按钮 */
+        .jump-to-rating {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--secondary);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 99;
+            transition: all 0.3s;
+            animation: pulse 2s infinite;
+        }
+        
+        .jump-to-rating:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .jump-to-rating i {
+            font-size: 24px;
+        }
+        
+        /* 语言切换动画 */
+        .lang-fade {
+            animation: langFade 0.5s ease;
+        }
+        
+        @keyframes langFade {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
         }
     </style>
 </head>
 <body>
-    <!-- 欢迎页面 / Welcome Page -->
-    <div id="welcome-page">
-        <div class="welcome-container">
-            <h1 class="welcome-title">
-                <span class="chinese">NBA球员评分系统</span>
-                <span class="english">NBA Player Rating System</span>
-            </h1>
-            <p class="welcome-subtitle">
-                <span class="chinese">点击任意球员查看详细评分</span>
-                <span class="english">Click any player to view detailed ratings</span>
-            </p>
-            
-            <div class="players-grid" id="players-grid">
-                <!-- 球员列表将通过JavaScript动态生成 / Player list will be dynamically generated by JavaScript -->
-            </div>
-        </div>
-    </div>
+    <!-- 加载动画 -->
+    <div class="loader" id="loader"></div>
     
-    <!-- 评分页面内容 / Rating Page Content -->
-    <div id="rating-page" class="hidden">
-        <div class="search-container">
-            <input type="text" id="player-search" placeholder="搜索球员名字... / Search player name...">
-            <button onclick="searchPlayer()">
-                <span class="chinese">搜索</span>
-                <span class="english">Search</span>
+    <!-- 直接跳转按钮 -->
+    <div class="jump-to-rating" id="jumpToRating">
+        <i class="fas fa-basketball-ball"></i>
+    </div>
+
+    <!-- 导航栏 -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-basketball-ball"></i>
+                    <span class="lang" key="title">球员评分系统</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#background" class="lang" key="nav-background">背景</a></li>
+                    <li><a href="#company" class="lang" key="nav-company">关于我们</a></li>
+                    <li><a href="#product" class="lang" key="nav-product">产品介绍</a></li>
+                    <li><a href="#future" class="lang" key="nav-future">未来构想</a></li>
+                    <li><a href="#contact" class="lang" key="nav-contact">联系我们</a></li>
+                </ul>
+                <select class="language-switcher" id="languageSwitcher">
+                    <option value="zh">中文</option>
+                    <option value="en">English</option>
+                </select>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="hero">
+        <div class="container hero-content">
+            <h1 class="lang" key="hero-title">重新定义球员评分系统</h1>
+            <p class="lang" key="hero-description">公平、精准、全面的球员评估平台，打破传统评分偏见，还原球员真实价值</p>
+            <a href="#main-content" class="btn lang" key="hero-button">探索更多</a>
+        </div>
+    </section>
+
+    <!-- 主要内容区域 -->
+    <main id="main-content" class="container">
+        <!-- 选项卡导航 -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="intro">
+                <span class="lang" key="tab-intro">系统介绍</span>
             </button>
-            <div id="suggestion-box" style="display: none;"></div>
+            <button class="tab-btn" data-tab="experience">
+                <span class="lang" key="tab-experience">体验评分系统</span>
+            </button>
         </div>
         
-        <div id="player-display" class="hidden">
-            <div class="player-container">
-                <div class="player-image">
-                    <img id="player-img" src="" alt="球员照片 / Player photo" onerror="this.src='https://via.placeholder.com/300x400?text=暂无图片/No+Image'">
-                </div>
-                <div class="player-info">
-                    <h1 id="player-name"></h1>
-                    <div class="stats-container">
-                        <div class="stat-item">
-                            <span class="stat-label">
-                                <span class="chinese">最终得分</span>
-                                <span class="english">Final Score</span>
-                            </span>
-                            <span class="stat-value" id="final-score"></span>
+        <!-- 介绍内容 -->
+        <div id="intro" class="tab-content active">
+            <!-- 背景介绍 -->
+            <section id="background" class="section">
+                <h2 class="section-title lang" key="background-title">球员记分系统乱象</h2>
+                <p class="lang" key="background-description">当前体育评分系统存在诸多问题，从电子游戏到专业评选，不公平的评分现象普遍存在。以下是我们收集的一些典型案例：</p>
+                
+                <div class="issues-grid">
+                    <div class="card">
+                        <div class="card-header lang" key="card1-title">NBA 2K游戏评分争议</div>
+                        <div class="card-body">
+                            <table>
+                                <tr>
+                                    <th class="lang" key="table-player">球员/事件</th>
+                                    <th class="lang" key="table-issue">评分争议点</th>
+                                </tr>
+                                <tr>
+                                    <td>詹姆斯·哈登</td>
+                                    <td class="lang" key="harden-issue">2K25评分仅84分，低于比尔(85)、戈贝尔(85)等角色球员，评分逐年大幅下降</td>
+                                </tr>
+                                <tr>
+                                    <td>德克·诺维茨基</td>
+                                    <td class="lang" key="nowitzki-issue">2K12中夺冠赛季评分仅88分，而未夺冠的詹姆斯(98)、韦德(96)评分更高</td>
+                                </tr>
+                                <tr>
+                                    <td>德玛尔·德罗赞</td>
+                                    <td class="lang" key="derozan-issue">2K11中场均17分却仅69分，远低于同期角色球员</td>
+                                </tr>
+                            </table>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-label">
-                                <span class="chinese">平均得分</span>
-                                <span class="english">Avg Points</span>
-                            </span>
-                            <span class="stat-value" id="avg-points"></span>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header lang" key="card2-title">全明星与最佳阵容评选争议</div>
+                        <div class="card-body">
+                            <table>
+                                <tr>
+                                    <th class="lang" key="table-player">球员/事件</th>
+                                    <th class="lang" key="table-issue">评分争议点</th>
+                                </tr>
+                                <tr>
+                                    <td>詹姆斯·哈登(2016年)</td>
+                                    <td class="lang" key="harden2016-issue">数据与战绩达标却因卡戴珊事件未入选最佳阵容，存在主观偏见</td>
+                                </tr>
+                                <tr>
+                                    <td>科比·布莱恩特</td>
+                                    <td class="lang" key="kobe-issue">湖人三连冠时期因团队角色让权给奥尼尔，导致总决赛MVP为零，历史地位常被低估</td>
+                                </tr>
+                                <tr>
+                                    <td>勒布朗·詹姆斯</td>
+                                    <td class="lang" key="james-issue">暮年因伤病错失冠军，但历史得分王等硬荣誉仍被部分媒体低估</td>
+                                </tr>
+                            </table>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-label">
-                                <span class="chinese">平均篮板</span>
-                                <span class="english">Avg Rebounds</span>
-                            </span>
-                            <span class="stat-value" id="avg-rebounds"></span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">
-                                <span class="chinese">平均助攻</span>
-                                <span class="english">Avg Assists</span>
-                            </span>
-                            <span class="stat-value" id="avg-assists"></span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">
-                                <span class="chinese">平均抢断</span>
-                                <span class="english">Avg Steals</span>
-                            </span>
-                            <span class="stat-value" id="avg-steals"></span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">
-                                <span class="chinese">平均盖帽</span>
-                                <span class="english">Avg Blocks</span>
-                            </span>
-                            <span class="stat-value" id="avg-blocks"></span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">
-                                <span class="chinese">投篮命中率</span>
-                                <span class="english">FG%</span>
-                            </span>
-                            <span class="stat-value" id="fg-percentage"></span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">
-                                <span class="chinese">三分命中率</span>
-                                <span class="english">3PT%</span>
-                            </span>
-                            <span class="stat-value" id="3pt-percentage"></span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">
-                                <span class="chinese">罚球命中率</span>
-                                <span class="english">FT%</span>
-                            </span>
-                            <span class="stat-value" id="ft-percentage"></span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">
-                                <span class="chinese">平均上场时间</span>
-                                <span class="english">Avg Minutes</span>
-                            </span>
-                            <span class="stat-value" id="avg-minutes"></span>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-header lang" key="card3-title">其他评分机制问题</div>
+                        <div class="card-body">
+                            <table>
+                                <tr>
+                                    <th class="lang" key="table-type">类型</th>
+                                    <th class="lang" key="table-issue">评分争议点</th>
+                                </tr>
+                                <tr>
+                                    <td class="lang" key="type-2k">2K评分规则</td>
+                                    <td class="lang" key="issue-2k">偏科球员评分偏低(如威少投篮智商仅25分)，均衡型球员更易获高分</td>
+                                </tr>
+                                <tr>
+                                    <td class="lang" key="type-subjective">主观印象分影响</td>
+                                    <td class="lang" key="issue-subjective">媒体和评委对球员口碑、影响力的过度依赖(如梅西、乔丹等暮年球员仍获高荣誉)</td>
+                                </tr>
+                            </table>
                         </div>
                     </div>
                 </div>
-            </div>
+                
+                <div class="card">
+                    <div class="card-header lang" key="summary-title">评分不公平性总结</div>
+                    <div class="card-body">
+                        <ol>
+                            <li><strong class="lang" key="summary1-title">主观因素：</strong><span class="lang" key="summary1-content">印象分、口碑、媒体偏见</span></li>
+                            <li><strong class="lang" key="summary2-title">规则缺陷：</strong><span class="lang" key="summary2-content">如2K评分对投篮稳定性、防守权重的分配</span></li>
+                            <li><strong class="lang" key="summary3-title">数据片面性：</strong><span class="lang" key="summary3-content">仅参考单一赛季表现或局部数据</span></li>
+                            <li><strong class="lang" key="summary4-title">团队角色影响：</strong><span class="lang" key="summary4-content">牺牲数据的团队型球员常被低估</span></li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 公司介绍 -->
+            <section id="company" class="section" style="background-color: #eef2f7;">
+                <h2 class="section-title lang" key="company-title">关于我们</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <p class="lang" key="company-p1">我们是一支由数据科学家、体育分析师和软件工程师组成的专业团队，致力于通过技术创新解决体育评分领域长期存在的不公平问题。</p>
+                        <p class="lang" key="company-p2">团队成员拥有多年体育数据分析经验，曾为多个职业体育组织提供数据支持和解说服务。</p>
+                        <p class="lang" key="company-p3">我们的使命是建立更加客观、全面、公正的球员评价体系，帮助球迷、球队和媒体更好地理解球员的真实价值。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 产品介绍 -->
+            <section id="product" class="section">
+                <h2 class="section-title lang" key="product-title">产品介绍</h2>
+                <blockquote class="lang" key="quote">"这是最好的时代，也是最坏的时代。" ------《双城记》</blockquote>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <p class="lang" key="product-p1">体育已成为我们现代社会不可分割的一部分。体育场上，拼搏的汗水换来荣光与掌声。但是出于各种原因，大众的目光只徘徊于浮于表面的数据，而造成对球员不公平的对待。这种存在已久的问题正是被我们晓组发现并致力解决的问题。为此，我组创造性运用新的计算方式与运行模式，开发新型的、全局的新评分系统。</p>
+                        
+                        <p class="lang" key="product-p2">本产品以网站形式呈现，简约式设计，提供相对操作简单的查询功能。目前仅支持中国汉语与英语，全球通用。产品设计初衷为提供较为精确的信息搜索，目前还有较大优化空间。</p>
+                        
+                        <p class="lang" key="product-p3">该产品通过从官方渠道摘取数据，经过本工作室较为公正的计算方式与数据模型的操作，并结合整理，以搜索引擎的形式连接数据库。而当前产品处于初级阶段，目前优化主要方向在于数据库优化，查询方式多样化与新的资本引入。或许将在将来带来更好体验的产品。</p>
+                        
+                        <p class="lang" key="product-p4">在此，感谢用户查看本产品介绍，如有建设性建议，一定请联系我们！</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 未来构想 -->
+            <section id="future" class="section" style="background-color: #eef2f7;">
+                <h2 class="section-title lang" key="future-title">未来构想</h2>
+                <p class="lang" key="future-p1">基于对开源项目展示类网站的通用分析框架，结合当前互联网发展趋势，以下是为该网站的未来构想。</p>
+                
+                <div class="future-grid">
+                    <div class="future-item">
+                        <h3 class="lang" key="future1-title">一、用户体验优化</h3>
+                        <ul>
+                            <li class="lang" key="future1-item1">响应式布局重构</li>
+                            <li class="lang" key="future1-item2">增加暗黑模式选项</li>
+                            <li class="lang" key="future1-item3">导航系统升级</li>
+                            <li class="lang" key="future1-item4">实现面包屑导航</li>
+                            <li class="lang" key="future1-item5">添加全局搜索功能</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="future-item">
+                        <h3 class="lang" key="future2-title">二、内容生态建设</h3>
+                        <ul>
+                            <li class="lang" key="future2-item1">技术文档体系化</li>
+                            <li class="lang" key="future2-item2">采用GitBook构建结构化文档系统</li>
+                            <li class="lang" key="future2-item3">开发者社区运营</li>
+                            <li class="lang" key="future2-item4">集成用户论坛系统</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="future-item">
+                        <h3 class="lang" key="future3-title">三、技术架构升级</h3>
+                        <ul>
+                            <li class="lang" key="future3-item1">性能优化方案</li>
+                            <li class="lang" key="future3-item2">安全增强措施</li>
+                            <li class="lang" key="future3-item3">部署方案优化</li>
+                            <li class="lang" key="future3-item4">迁移至Vercel/Vercel Pro</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="future-item">
+                        <h3 class="lang" key="future4-title">四、商业模式</h3>
+                        <ul>
+                            <li class="lang" key="future4-item1">开源商业化路径</li>
+                            <li class="lang" key="future4-item2">内容变现策略</li>
+                            <li class="lang" key="future4-item4">创建会员订阅体系</li>
+                            <li class="lang" key="future4-item5">周边生态拓展</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="future-item">
+                        <h3 class="lang" key="future5-title">五、前沿技术融合</h3>
+                        <ul>
+                            <li class="lang" key="future5-item1">AI能力注入</li>
+                            <li class="lang" key="future5-item2">集成ChatGPT实现智能问答</li>
+                            <li class="lang" key="future5-item3">开发代码生成助手</li>
+                            <li class="lang" key="future5-item4">构建项目推荐系统</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
         </div>
         
-        <!-- 返回按钮 / Back Button -->
-        <div class="back-btn-container">
-            <button class="back-btn" onclick="backToWelcome()">
-                <span class="chinese">返回球员列表</span>
-                <span class="english">Back to Player List</span>
-            </button>
+        <!-- 体验内容 -->
+        <div id="experience" class="tab-content">
+            <section class="rating-system">
+                <!-- 欢迎页面 -->
+                <div id="welcome-page">
+                    <div class="welcome-container">
+                        <h1 class="welcome-title lang" key="rating-title">NBA球员评分系统</h1>
+                        <p class="lang" key="rating-instruction">点击任意球员查看详细评分</p>
+                        
+                        <div class="players-grid" id="players-grid">
+                            <!-- 球员列表将通过JavaScript动态生成 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 评分页面内容 -->
+                <div id="rating-page" class="hidden">
+                    <div class="search-container">
+                        <input type="text" id="player-search" placeholder="搜索球员名字...">
+                        <button class="rating-btn lang" key="search-button" onclick="searchPlayer()">搜索</button>
+                        <div id="suggestion-box" style="display: none;"></div>
+                    </div>
+                    
+                    <div id="player-display" class="hidden">
+                        <div class="player-container">
+                            <div class="player-image">
+                                <img id="player-img" src="" alt="球员照片" onerror="this.src='https://via.placeholder.com/300x400?text=暂无图片'">
+                            </div>
+                            <div class="player-info">
+                                <h1 id="player-name"></h1>
+                                <div class="stats-container">
+                                    <div class="stat-item">
+                                        <span class="stat-label lang" key="final-score">最终得分</span>
+                                        <span class="stat-value" id="final-score"></span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label lang" key="avg-points">平均得分</span>
+                                        <span class="stat-value" id="avg-points"></span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label lang" key="avg-rebounds">平均篮板</span>
+                                        <span class="stat-value" id="avg-rebounds"></span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label lang" key="avg-assists">平均助攻</span>
+                                        <span class="stat-value" id="avg-assists"></span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label lang" key="avg-steals">平均抢断</span>
+                                        <span class="stat-value" id="avg-steals"></span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label lang" key="avg-blocks">平均盖帽</span>
+                                        <span class="stat-value" id="avg-blocks"></span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label lang" key="fg-percentage">投篮命中率</span>
+                                        <span class="stat-value" id="fg-percentage"></span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label lang" key="3pt-percentage">三分命中率</span>
+                                        <span class="stat-value" id="3pt-percentage"></span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label lang" key="ft-percentage">罚球命中率</span>
+                                        <span class="stat-value" id="ft-percentage"></span>
+                                    </div>
+                                    <div class="stat-item">
+                                        <span class="stat-label lang" key="avg-minutes">平均上场时间</span>
+                                        <span class="stat-value" id="avg-minutes"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 返回按钮 -->
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn lang" key="back-button" onclick="backToWelcome()">返回球员列表</button>
+                    </div>
+                </div>
+            </section>
         </div>
-    </div>
- 
+    </main>
+
+    <!-- 页脚 -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="lang" key="footer-about">关于我们</h3>
+                    <p class="lang" key="footer-about-desc">我们致力于通过技术创新解决体育评分领域长期存在的不公平问题，建立更加客观、全面、公正的球员评价体系。</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3 class="lang" key="footer-contact">联系方式</h3>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-map-marker-alt"></i> <span class="lang" key="footer-address">北京市海淀区中关村南大街5号</span></li>
+                        <li><i class="fas fa-phone"></i> +86 10 8888 8888</li>
+                        <li><i class="fas fa-envelope"></i> contact@playerratings.com</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3 class="lang" key="footer-follow">关注我们</h3>
+                    <div class="socials">
+                        <a href="#" class="btn" style="padding: 0.5rem 1rem; margin-right: 0.5rem;"><i class="fab fa-weibo"></i> <span class="lang" key="footer-weibo">微博</span></a>
+                        <a href="#" class="btn" style="padding: 0.5rem 1rem; margin-right: 0.5rem;"><i class="fab fa-weixin"></i> <span class="lang" key="footer-wechat">微信</span></a>
+                        <a href="#" class="btn" style="padding: 0.5rem 1rem;"><i class="fab fa-github"></i> GitHub</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 <span class="lang" key="footer-copyright">球员评分系统 - 所有权利保留</span></p>
+            </div>
+        </div>
+    </footer>
+
     <script>
-        // 球员数据 / Player Data 
+        // 语言设置
+        const translations = {
+            'zh': {
+                'title': '球员评分系统',
+                'nav-background': '背景',
+                'nav-company': '关于我们',
+                'nav-product': '产品介绍',
+                'nav-future': '未来构想',
+                'nav-contact': '联系我们',
+                'hero-title': '重新定义球员评分系统',
+                'hero-description': '公平、精准、全面的球员评估平台，打破传统评分偏见，还原球员真实价值',
+                'hero-button': '探索更多',
+                'tab-intro': '系统介绍',
+                'tab-experience': '体验评分系统',
+                'background-title': '球员记分系统乱象',
+                'background-description': '当前体育评分系统存在诸多问题，从电子游戏到专业评选，不公平的评分现象普遍存在。以下是我们收集的一些典型案例：',
+                'card1-title': 'NBA 2K游戏评分争议',
+                'card2-title': '全明星与最佳阵容评选争议',
+                'card3-title': '其他评分机制问题',
+                'table-player': '球员/事件',
+                'table-issue': '评分争议点',
+                'table-type': '类型',
+                'harden-issue': '2K25评分仅84分，低于比尔(85)、戈贝尔(85)等角色球员，评分逐年大幅下降',
+                'nowitzki-issue': '2K12中夺冠赛季评分仅88分，而未夺冠的詹姆斯(98)、韦德(96)评分更高',
+                'derozan-issue': '2K11中场均17分却仅69分，远低于同期角色球员',
+                'harden2016-issue': '数据与战绩达标却因卡戴珊事件未入选最佳阵容，存在主观偏见',
+                'kobe-issue': '湖人三连冠时期因团队角色让权给奥尼尔，导致总决赛MVP为零，历史地位常被低估',
+                'james-issue': '暮年因伤病错失冠军，但历史得分王等硬荣誉仍被部分媒体低估',
+                'type-2k': '2K评分规则',
+                'issue-2k': '偏科球员评分偏低(如威少投篮智商仅25分)，均衡型球员更易获高分',
+                'type-subjective': '主观印象分影响',
+                'issue-subjective': '媒体和评委对球员口碑、影响力的过度依赖(如梅西、乔丹等暮年球员仍获高荣誉)',
+                'summary-title': '评分不公平性总结',
+                'summary1-title': '主观因素：',
+                'summary1-content': '印象分、口碑、媒体偏见',
+                'summary2-title': '规则缺陷：',
+                'summary2-content': '如2K评分对投篮稳定性、防守权重的分配',
+                'summary3-title': '数据片面性：',
+                'summary3-content': '仅参考单一赛季表现或局部数据',
+                'summary4-title': '团队角色影响：',
+                'summary4-content': '牺牲数据的团队型球员常被低估',
+                'company-title': '关于我们',
+                'company-p1': '我们是一支由数据科学家、体育分析师和软件工程师组成的专业团队，致力于通过技术创新解决体育评分领域长期存在的不公平问题。',
+                'company-p2': '团队成员拥有多年体育数据分析经验，曾为多个职业体育组织提供数据支持和解说服务。',
+                'company-p3': '我们的使命是建立更加客观、全面、公正的球员评价体系，帮助球迷、球队和媒体更好地理解球员的真实价值。',
+                'product-title': '产品介绍',
+                'quote': '"这是最好的时代，也是最坏的时代。" ------《双城记》',
+                'product-p1': '体育已成为我们现代社会不可分割的一部分。体育场上，拼搏的汗水换来荣光与掌声。但是出于各种原因，大众的目光只徘徊于浮于表面的数据，而造成对球员不公平的对待。这种存在已久的问题正是被我们晓组发现并致力解决的问题。为此，我组创造性运用新的计算方式与运行模式，开发新型的、全局的新评分系统。',
+                'product-p2': '本产品以网站形式呈现，简约式设计，提供相对操作简单的查询功能。目前仅支持中国汉语与英语，全球通用。产品设计初衷为提供较为精确的信息搜索，目前还有较大优化空间。',
+                'product-p3': '该产品通过从官方渠道摘取数据，经过本工作室较为公正的计算方式与数据模型的操作，并结合整理，以搜索引擎的形式连接数据库。而当前产品处于初级阶段，目前优化主要方向在于数据库优化，查询方式多样化与新的资本引入。或许将在将来带来更好体验的产品。',
+                'product-p4': '在此，感谢用户查看本产品介绍，如有建设性建议，一定请联系我们！',
+                'future-title': '未来构想',
+                'future-p1': '基于对开源项目展示类网站的通用分析框架，结合当前互联网发展趋势，以下是为该网站的未来构想。',
+                'future1-title': '一、用户体验优化',
+                'future1-item1': '响应式布局重构',
+                'future1-item2': '增加暗黑模式选项',
+                'future1-item3': '导航系统升级',
+                'future1-item4': '实现面包屑导航',
+                'future1-item5': '添加全局搜索功能',
+                'future2-title': '二、内容生态建设',
+                'future2-item1': '技术文档体系化',
+                'future2-item2': '采用GitBook构建结构化文档系统',
+                'future2-item3': '开发者社区运营',
+                'future2-item4': '集成用户论坛系统',
+                'future3-title': '三、技术架构升级',
+                'future3-item1': '性能优化方案',
+                'future3-item2': '安全增强措施',
+                'future3-item3': '部署方案优化',
+                'future3-item4': '迁移至Vercel/Vercel Pro',
+                'future4-title': '四、商业模式',
+                'future4-item1': '开源商业化路径',
+                'future4-item2': '内容变现策略',
+                'future4-item4': '创建会员订阅体系',
+                'future4-item5': '周边生态拓展',
+                'future5-title': '五、前沿技术融合',
+                'future5-item1': 'AI能力注入',
+                'future5-item2': '集成ChatGPT实现智能问答',
+                'future5-item3': '开发代码生成助手',
+                'future5-item4': '构建项目推荐系统',
+                'rating-title': 'NBA球员评分系统',
+                'rating-instruction': '点击任意球员查看详细评分',
+                'search-button': '搜索',
+                'final-score': '最终得分',
+                'avg-points': '平均得分',
+                'avg-rebounds': '平均篮板',
+                'avg-assists': '平均助攻',
+                'avg-steals': '平均抢断',
+                'avg-blocks': '平均盖帽',
+                'fg-percentage': '投篮命中率',
+                '3pt-percentage': '三分命中率',
+                'ft-percentage': '罚球命中率',
+                'avg-minutes': '平均上场时间',
+                'back-button': '返回球员列表',
+                'footer-about': '关于我们',
+                'footer-about-desc': '我们致力于通过技术创新解决体育评分领域长期存在的不公平问题，建立更加客观、全面、公正的球员评价体系。',
+                'footer-contact': '联系方式',
+                'footer-address': '北京市海淀区中关村南大街5号',
+                'footer-follow': '关注我们',
+                'footer-weibo': '微博',
+                'footer-wechat': '微信',
+                'footer-copyright': '球员评分系统 - 所有权利保留'
+            },
+            'en': {
+                'title': 'Player Rating System',
+                'nav-background': 'Background',
+                'nav-company': 'About Us',
+                'nav-product': 'Product',
+                'nav-future': 'Future Vision',
+                'nav-contact': 'Contact',
+                'hero-title': 'Redefining Player Rating Systems',
+                'hero-description': 'A fair, accurate, and comprehensive player evaluation platform that breaks traditional rating biases and reveals true player value',
+                'hero-button': 'Explore More',
+                'tab-intro': 'System Introduction',
+                'tab-experience': 'Experience Rating System',
+                'background-title': 'Player Scoring System Issues',
+                'background-description': 'Current sports rating systems have many problems, from video games to professional selections, unfair rating phenomena are widespread. Here are some typical cases we collected:',
+                'card1-title': 'NBA 2K Rating Controversies',
+                'card2-title': 'All-Star and All-NBA Selection Controversies',
+                'card3-title': 'Other Rating Mechanism Issues',
+                'table-player': 'Player/Event',
+                'table-issue': 'Rating Controversy',
+                'table-type': 'Type',
+                'harden-issue': '2K25 rating only 84 points, lower than role players like Beal (85), Gobert (85), with significant yearly declines',
+                'nowitzki-issue': 'In 2K12, championship season rating only 88 points, while non-champions James (98), Wade (96) had higher ratings',
+                'derozan-issue': 'Averaged 17 points in 2K11 but only 69 rating, much lower than同期 role players',
+                'harden2016-issue': 'Met stats and record requirements but not selected for All-NBA due to Kardashian incident, showing subjective bias',
+                'kobe-issue': 'During Lakers three-peat, deferred to O\'Neal in team role resulting in zero Finals MVP, often underestimated in historical地位',
+                'james-issue': 'In later years missed championships due to injuries, but hard honors like all-time scoring leader still underestimated by some media',
+                'type-2k': '2K Rating Rules',
+                'issue-2k': 'Specialized players rated lower (e.g., Westbrook shooting IQ only 25), balanced players更容易 get high ratings',
+                'type-subjective': 'Subjective Impression Influence',
+                'issue-subjective': 'Over-reliance on player reputation and influence by media and judges (e.g., Messi, Jordan still getting high honors in later years)',
+                'summary-title': 'Rating Unfairness Summary',
+                'summary1-title': 'Subjective Factors:',
+                'summary1-content': 'Impression points, reputation, media bias',
+                'summary2-title': 'Rule Defects:',
+                'summary2-content': 'Such as 2K rating allocation for shooting stability, defensive weight',
+                'summary3-title': 'Data One-Sidedness:',
+                'summary3-content': 'Only referencing single season performance or partial data',
+                'summary4-title': 'Team Role Impact:',
+                'summary4-content': 'Team players sacrificing stats often underestimated',
+                'company-title': 'About Us',
+                'company-p1': 'We are a professional team of data scientists, sports analysts, and software engineers dedicated to solving long-standing unfairness in sports rating through technological innovation.',
+                'company-p2': 'Team members have years of experience in sports data analysis and have provided data support and commentary services for multiple professional sports organizations.',
+                'company-p3': 'Our mission is to establish a more objective, comprehensive, and fair player evaluation system to help fans, teams, and media better understand players\' true value.',
+                'product-title': 'Product Introduction',
+                'quote': '"It was the best of times, it was the worst of times." ------A Tale of Two Cities',
+                'product-p1': 'Sports have become an inseparable part of our modern society. On the sports field,拼搏的汗水换来荣光与掌声。But for various reasons, public attention only徘徊于 surface data, causing unfair treatment of players. This long-existing problem is what our team discovered and is committed to solving. For this purpose, we creatively applied new calculation methods and operational models to develop a new, comprehensive rating system.',
+                'product-p2': 'This product is presented in website form with minimalist design, providing relatively simple query functionality. Currently supports only Chinese and English, globally applicable. The product was designed to provide relatively accurate information search, with still significant optimization space.',
+                'product-p3': 'This product extracts data from official channels, processes it through our studio\'s relatively fair calculation methods and data models, and connects to the database in the form of a search engine. The current product is in its early stages, with optimization mainly focused on database optimization, diversified query methods, and new capital introduction. Perhaps it will bring a better experience product in the future.',
+                'product-p4': 'Here, thank users for viewing this product introduction. If you have constructive suggestions, please contact us!',
+                'future-title': 'Future Vision',
+                'future-p1': 'Based on the universal analysis framework for open source project展示 websites, combined with current internet development trends, the following is the future vision for this website.',
+                'future1-title': 'I. User Experience Optimization',
+                'future1-item1': 'Responsive layout重构',
+                'future1-item2': 'Add dark mode option',
+                'future1-item3': 'Navigation system upgrade',
+                'future1-item4': 'Implement breadcrumb navigation',
+                'future1-item5': 'Add global search function',
+                'future2-title': 'II. Content Ecosystem Construction',
+                'future2-item1': 'Technical documentation系统化',
+                'future2-item2': 'Use GitBook to build structured documentation system',
+                'future2-item3': 'Developer community operation',
+                'future2-item4': 'Integrated user forum system',
+                'future3-title': 'III. Technical Architecture Upgrade',
+                'future3-item1': 'Performance optimization方案',
+                'future3-item2': 'Security enhancement measures',
+                'future3-item3': 'Deployment方案 optimization',
+                'future3-item4': 'Migrate to Vercel/Vercel Pro',
+                'future4-title': 'IV. Business Model',
+                'future4-item1': 'Open source commercialization path',
+                'future4-item2': 'Content monetization strategy',
+                'future4-item4': 'Create membership subscription system',
+                'future4-item5': 'Peripheral ecosystem expansion',
+                'future5-title': 'V. Cutting-edge Technology Integration',
+                'future5-item1': 'AI capability injection',
+                'future5-item2': 'Integrate ChatGPT for intelligent Q&A',
+                'future5-item3': 'Develop code generation assistant',
+                'future5-item4': 'Build project recommendation system',
+                'rating-title': 'NBA Player Rating System',
+                'rating-instruction': 'Click any player to view detailed ratings',
+                'search-button': 'Search',
+                'final-score': 'Final Score',
+                'avg-points': 'Avg Points',
+                'avg-rebounds': 'Avg Rebounds',
+                'avg-assists': 'Avg Assists',
+                'avg-steals': 'Avg Steals',
+                'avg-blocks': 'Avg Blocks',
+                'fg-percentage': 'FG Percentage',
+                '3pt-percentage': '3PT Percentage',
+                'ft-percentage': 'FT Percentage',
+                'avg-minutes': 'Avg Minutes',
+                'back-button': 'Back to Player List',
+                'footer-about': 'About Us',
+                'footer-about-desc': 'We are committed to solving long-standing unfairness in sports rating through technological innovation and establishing a more objective, comprehensive, and fair player evaluation system.',
+                'footer-contact': 'Contact Information',
+                'footer-address': 'No. 5 Zhongguancun South Street, Haidian District, Beijing',
+                'footer-follow': 'Follow Us',
+                'footer-weibo': 'Weibo',
+                'footer-wechat': 'WeChat',
+                'footer-copyright': 'Player Rating System - All Rights Reserved'
+            }
+        };
+
+        // 设置语言
+        function setLanguage(lang) {
+            document.querySelectorAll('.lang').forEach(element => {
+                const key = element.getAttribute('key');
+                if (translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            // 更新搜索框占位符
+            if (lang === 'en') {
+                document.getElementById('player-search').placeholder = 'Search player name...';
+            } else {
+                document.getElementById('player-search').placeholder = '搜索球员名字...';
+            }
+            
+            // 添加语言切换动画
+            document.body.classList.add('lang-fade');
+            setTimeout(() => {
+                document.body.classList.remove('lang-fade');
+            }, 500);
+        }
+
+        // 选项卡切换功能
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 移除所有active类
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // 添加active类到当前选项卡
+                btn.classList.add('active');
+                const tabId = btn.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // 平滑滚动效果
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if(targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if(targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 70,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
+                header.style.background = 'linear-gradient(135deg, var(--primary), #0d2d5a)';
+            } else {
+                header.style.boxShadow = 'none';
+                header.style.background = 'linear-gradient(135deg, var(--primary), #0d2d5a)';
+            }
+            
+            // 滚动动画
+            document.querySelectorAll('.section').forEach(section => {
+                const position = section.getBoundingClientRect();
+                if (position.top < window.innerHeight - 100) {
+                    section.classList.add('visible');
+                }
+            });
+            
+            document.querySelectorAll('.card, .future-item').forEach((item, index) => {
+                const position = item.getBoundingClientRect();
+                if (position.top < window.innerHeight - 100) {
+                    setTimeout(() => {
+                        item.classList.add('animate');
+                    }, index * 100);
+                }
+            });
+        });
+        
+        // 直接跳转到评分系统
+        document.getElementById('jumpToRating').addEventListener('click', function() {
+            // 切换到评分系统选项卡
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            document.querySelector('[data-tab="experience"]').classList.add('active');
+            document.getElementById('experience').classList.add('active');
+            
+            // 滚动到顶部
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 球员数据
         const playersData = [
             {
-                "name": "约基奇 / Nikola Jokić",
+                "name": "约基奇",
+                "nameEn": "Nikola Jokić",
                 "avgPoints": 29.8,
                 "avgRebounds": 12.8,
                 "avgAssists": 10.2,
@@ -429,7 +1637,8 @@
                 "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/203999.png"
             },
             {
-                "name": "字母哥 / Giannis Antetokounmpo",
+                "name": "字母哥",
+                "nameEn": "Giannis Antetokounmpo",
                 "avgPoints": 30.4,
                 "avgRebounds": 11.9,
                 "avgAssists": 6.3,
@@ -443,7 +1652,8 @@
                 "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/203507.png"
             },
             {
-                "name": "特雷杨 / Trae Young",
+                "name": "特雷杨",
+                "nameEn": "Trae Young",
                 "avgPoints": 24.1,
                 "avgRebounds": 3.1,
                 "avgAssists": 11.6,
@@ -457,7 +1667,8 @@
                 "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/1629027.png"
             },
             {
-                "name": "东契奇 / Luka Dončić",
+                "name": "东契奇",
+                "nameEn": "Luka Dončić",
                 "avgPoints": 34.3,
                 "avgRebounds": 9.1,
                 "avgAssists": 9.8,
@@ -471,7 +1682,8 @@
                 "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/1629029.png"
             },
             {
-                "name": "库里 / Stephen Curry",
+                "name": "库里",
+                "nameEn": "Stephen Curry",
                 "avgPoints": 24.5,
                 "avgRebounds": 4.5,
                 "avgAssists": 6,
@@ -485,7 +1697,8 @@
                 "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/201939.png"
             },
             {
-                "name": "塔图姆 / Jayson Tatum",
+                "name": "塔图姆",
+                "nameEn": "Jayson Tatum",
                 "avgPoints": 27,
                 "avgRebounds": 8.6,
                 "avgAssists": 6,
@@ -499,7 +1712,8 @@
                 "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/1628369.png"
             },
             {
-                "name": "杜兰特 / Kevin Durant",
+                "name": "杜兰特",
+                "nameEn": "Kevin Durant",
                 "avgPoints": 26.6,
                 "avgRebounds": 6.1,
                 "avgAssists": 4.2,
@@ -513,7 +1727,8 @@
                 "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/201142.png"
             },
             {
-                "name": "恩比德 / Joel Embiid",
+                "name": "恩比德",
+                "nameEn": "Joel Embiid",
                 "avgPoints": 33.1,
                 "avgRebounds": 10.2,
                 "avgAssists": 4.2,
@@ -527,7 +1742,8 @@
                 "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/203954.png"
             },
             {
-                "name": "詹姆斯 / LeBron James",
+                "name": "詹姆斯",
+                "nameEn": "LeBron James",
                 "avgPoints": 24.6,
                 "avgRebounds": 7.9,
                 "avgAssists": 8.2,
@@ -541,7 +1757,8 @@
                 "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/2544.png"
             },
             {
-                "name": "安东尼戴维斯 / Anthony Davis",
+                "name": "安东尼戴维斯",
+                "nameEn": "Anthony Davis",
                 "avgPoints": 24.7,
                 "avgRebounds": 12.6,
                 "avgAssists": 3.5,
@@ -555,101 +1772,132 @@
                 "image": "https://cdn.nba.com/headshots/nba/latest/1040x760/203076.png"
             }
         ];
- 
-        // 页面加载完成后初始化 / Initialize after page load 
+
+        // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', function() {
-            // 生成球员卡片 / Generate player cards 
+            // 隐藏加载动画
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+            }, 1000);
+            
+            // 初始化语言
+            const savedLang = localStorage.getItem('preferredLang') || 'zh';
+            document.getElementById('languageSwitcher').value = savedLang;
+            setLanguage(savedLang);
+            
+            // 语言切换事件
+            document.getElementById('languageSwitcher').addEventListener('change', function() {
+                const lang = this.value;
+                localStorage.setItem('preferredLang', lang);
+                setLanguage(lang);
+            });
+            
+            // 生成球员卡片
             const grid = document.getElementById('players-grid');
+            const currentLang = document.getElementById('languageSwitcher').value;
             
             playersData.forEach(player => {
                 const card = document.createElement('div');
                 card.className = 'player-card';
-                card.innerHTML = `<div class="player-name">${player.name}</div>`;
+                card.innerHTML = `<div class="player-name">${currentLang === 'en' ? player.nameEn : player.name}</div>`;
                 card.addEventListener('click', () => {
-                    // 切换到评分页面 / Switch to rating page
+                    // 切换到评分页面
                     document.getElementById('welcome-page').classList.add('hidden');
                     document.getElementById('rating-page').classList.remove('hidden');
                     
-                    // 自动搜索选中的球员 / Auto search selected player
-                    document.getElementById('player-search').value = player.name.split(' / ')[0];
+                    // 自动搜索选中的球员
+                    document.getElementById('player-search').value = currentLang === 'en' ? player.nameEn : player.name;
                     searchPlayer();
                 });
                 grid.appendChild(card);
             });
             
-            // 添加搜索按钮事件 / Add search button event 
-            document.querySelector('button').addEventListener('click', searchPlayer);
+            // 添加搜索按钮事件
+            document.querySelector('.rating-btn').addEventListener('click', searchPlayer);
             
-            // 添加回车键搜索功能 / Add enter key search function 
+            // 添加回车键搜索功能
             document.getElementById('player-search').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     searchPlayer();
                 }
             });
             
-            // 添加自动完成功能 / Add autocomplete function 
+            // 添加自动完成功能
             document.getElementById('player-search').addEventListener('input', function(e) {
                 const searchTerm = e.target.value.toLowerCase();
                 const suggestionBox = document.getElementById('suggestion-box');
+                const currentLang = document.getElementById('languageSwitcher').value;
                 
                 if (searchTerm.length < 1) {
                     suggestionBox.style.display = 'none';
                     return;
                 }
                 
-                const suggestions = playersData.filter(player => 
-                    player.name.toLowerCase().includes(searchTerm)
-                ).slice(0, 5);
+                const suggestions = playersData.filter(player => {
+                    const name = currentLang === 'en' ? player.nameEn : player.name;
+                    return name.toLowerCase().includes(searchTerm);
+                }).slice(0, 5);
                 
                 if (suggestions.length > 0) {
-                    showSuggestions(suggestions);
+                    showSuggestions(suggestions, currentLang);
                     suggestionBox.style.display = 'block';
                 } else {
                     suggestionBox.style.display = 'none';
                 }
             });
             
-            // 点击页面其他区域隐藏建议框 / Hide suggestion box when clicking elsewhere
+            // 点击页面其他区域隐藏建议框
             document.addEventListener('click', function(e) {
                 if (e.target.id !== 'player-search') {
                     document.getElementById('suggestion-box').style.display = 'none';
                 }
             });
+            
+            // 触发滚动事件以启动动画
+            window.dispatchEvent(new Event('scroll'));
+            
+            // 检查URL参数，决定是否直接跳转到评分系统
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('goto') === 'rating') {
+                document.getElementById('jumpToRating').click();
+            }
         });
- 
+
         function searchPlayer() {
             const searchInput = document.getElementById('player-search').value.trim();
             const playerDisplay = document.getElementById('player-display');
+            const currentLang = document.getElementById('languageSwitcher').value;
             
             if (!searchInput) {
-                alert('请输入球员名字 / Please enter player name');
+                alert(currentLang === 'en' ? 'Please enter a player name' : '请输入球员名字');
                 return;
             }
             
-            // 不区分大小写搜索 / Case-insensitive search
-            const player = playersData.find(p => 
-                p.name.toLowerCase().includes(searchInput.toLowerCase())
-            );
+            // 不区分大小写搜索
+            const player = playersData.find(p => {
+                const name = currentLang === 'en' ? p.nameEn : p.name;
+                return name.toLowerCase().includes(searchInput.toLowerCase());
+            });
             
             if (player) {
-                updatePlayerDisplay(player);
+                updatePlayerDisplay(player, currentLang);
                 playerDisplay.classList.remove('hidden');
             } else {
-                alert('未找到该球员，请检查名字是否正确 / Player not found, please check the name');
+                alert(currentLang === 'en' ? 'Player not found, please check the name' : '未找到该球员，请检查名字是否正确');
                 playerDisplay.classList.add('hidden');
             }
             
-            // 隐藏建议框 / Hide suggestion box
+            // 隐藏建议框
             document.getElementById('suggestion-box').style.display = 'none';
         }
- 
-        function updatePlayerDisplay(player) {
-            // 更新基本信息 / Update basic info
-            document.getElementById('player-name').textContent = player.name;
+
+        function updatePlayerDisplay(player, lang) {
+            // 更新基本信息
+            document.getElementById('player-name').textContent = lang === 'en' ? player.nameEn : player.name;
             document.getElementById('player-img').src = player.image;
-            document.getElementById('player-img').alt = `${player.name}的照片 / ${player.name.split(' / ')[1]} photo`;
+            document.getElementById('player-img').alt = `${lang === 'en' ? player.nameEn : player.name}的照片`;
             
-            // 更新统计数据 / Update stats 
+            // 更新统计数据
             document.getElementById('final-score').textContent = player.finalScore;
             document.getElementById('avg-points').textContent = player.avgPoints;
             document.getElementById('avg-rebounds').textContent = player.avgRebounds;
@@ -659,20 +1907,20 @@
             document.getElementById('fg-percentage').textContent = `${(player.fgPercentage * 100).toFixed(1)}%`;
             document.getElementById('3pt-percentage').textContent = `${(player.threePtPercentage * 100).toFixed(1)}%`;
             document.getElementById('ft-percentage').textContent = `${(player.ftPercentage * 100).toFixed(1)}%`;
-            document.getElementById('avg-minutes').textContent = `${player.avgMinutes}分钟 / mins`;
+            document.getElementById('avg-minutes').textContent = `${player.avgMinutes}${lang === 'en' ? 'mins' : '分钟'}`;
         }
- 
-        function showSuggestions(suggestions) {
+
+        function showSuggestions(suggestions, lang) {
             const box = document.getElementById('suggestion-box');
             box.innerHTML = '';
             
             suggestions.forEach(player => {
                 const item = document.createElement('div');
-                item.textContent = player.name;
-                item.style.padding = '12px 20px';
+                item.textContent = lang === 'en' ? player.nameEn : player.name;
+                item.style.padding = '8px';
                 item.style.cursor = 'pointer';
                 item.addEventListener('click', () => {
-                    document.getElementById('player-search').value = player.name.split(' / ')[0];
+                    document.getElementById('player-search').value = lang === 'en' ? player.nameEn : player.name;
                     box.style.display = 'none';
                     searchPlayer();
                 });
